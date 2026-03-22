@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AANNS - Integrated School Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --school-blue: #1e3a8a;
+            --school-gold: #fbbf24;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .sidebar-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid var(--school-gold);
+            color: white;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glass-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .rfid-glow {
+            animation: pulse-blue 2s infinite;
+        }
+
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(30, 58, 138, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(30, 58, 138, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(30, 58, 138, 0); }
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex-shrink-0 hidden md:flex flex-col z-20 shadow-xl">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-10">
+                <div class="w-10 h-10 bg-amber-400 rounded-lg flex items-center justify-center text-blue-900 font-black text-xl shadow-lg">
+                    AN
+                </div>
+                <div>
+                    <h1 class="text-xs font-black leading-tight tracking-widest uppercase">A. Nocon NHS</h1>
+                    <p class="text-[10px] text-blue-300 font-medium">Digital Campus Hub</p>
+                </div>
+            </div>
+
+            <nav class="space-y-1" id="navMenu">
+                <button data-target="dashboard" class="sidebar-link active w-full flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group text-left">
+                    <i class="fas fa-chart-pie w-5 text-blue-300 group-hover:text-amber-400"></i>
+                    <span class="text-sm font-semibold">Dashboard</span>
+                </button>
+                <button data-target="library" class="sidebar-link w-full flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group text-left">
+                    <i class="fas fa-book-reader w-5 text-blue-300 group-hover:text-amber-400"></i>
+                    <span class="text-sm font-semibold">Library (RFID)</span>
+                </button>
+                <button data-target="tracking" class="sidebar-link w-full flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group text-left">
+                    <i class="fas fa-map-marker-alt w-5 text-blue-300 group-hover:text-amber-400"></i>
+                    <span class="text-sm font-semibold">Doc Tracking</span>
+                </button>
+                <button data-target="ebooks" class="sidebar-link w-full flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group text-left">
+                    <i class="fas fa-tablet-alt w-5 text-blue-300 group-hover:text-amber-400"></i>
+                    <span class="text-sm font-semibold">E-Books</span>
+                </button>
+                <button data-target="rewards" class="sidebar-link w-full flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group text-left">
+                    <i class="fas fa-gem w-5 text-blue-300 group-hover:text-amber-400"></i>
+                    <span class="text-sm font-semibold">Rewards Points</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="mt-auto p-6 border-t border-blue-800 bg-blue-950/30">
+            <div class="flex items-center space-x-3 mb-4">
+                <img src="https://ui-avatars.com/api/?name=Juan+Dela+Cruz&background=fbbf24&color=1e3a8a" class="w-10 h-10 rounded-full border-2 border-blue-700" alt="Profile">
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold truncate">Juan Dela Cruz</p>
+                    <p class="text-[10px] text-blue-400 font-medium tracking-tight">Grade 12 - STEM Alpha</p>
+                </div>
+            </div>
+            <button class="w-full text-left text-[11px] text-blue-400 hover:text-white flex items-center space-x-2 transition-colors">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="font-bold uppercase tracking-wider">Logout System</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-100 overflow-hidden relative">
+        
+        <!-- Global Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 flex-shrink-0 z-10 shadow-sm">
+            <div>
+                <h2 id="viewTitle" class="text-lg font-black text-slate-800 tracking-tight">Student Dashboard</h2>
+            </div>
+
+            <div class="flex items-center space-x-5">
+                <div class="hidden lg:flex items-center bg-slate-100 rounded-full px-4 py-2 border border-slate-200">
+                    <i class="fas fa-search text-slate-400 text-xs"></i>
+                    <input type="text" placeholder="Search system..." class="bg-transparent border-none text-xs focus:outline-none w-48 ml-2">
+                </div>
+                <div class="flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-100 group cursor-help" title="Your Total Points">
+                    <i class="fas fa-coins text-amber-500 text-sm animate-bounce"></i>
+                    <span id="userPoints" class="text-sm font-black text-blue-900">450</span>
+                    <span class="text-[10px] font-black text-blue-400 uppercase tracking-tighter">pts</span>
+                </div>
+                <div class="relative">
+                    <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    <i class="far fa-bell text-slate-500 text-lg cursor-pointer hover:text-blue-600 transition-colors"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Area -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8">
+
+            <!-- SECTION: DASHBOARD -->
+            <section id="view-dashboard" class="view-section active">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="glass-card p-6 rounded-3xl shadow-sm border-l-4 border-blue-600">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Books Held</p>
+                                <h3 class="text-3xl font-black text-slate-800">03</h3>
+                            </div>
+                            <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl"><i class="fas fa-book"></i></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl shadow-sm border-l-4 border-amber-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Doc Status</p>
+                                <h3 class="text-2xl font-black text-slate-800">Reviewing</h3>
+                            </div>
+                            <div class="p-3 bg-amber-50 text-amber-500 rounded-2xl"><i class="fas fa-spinner fa-spin"></i></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl shadow-sm border-l-4 border-green-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Attendance</p>
+                                <h3 class="text-3xl font-black text-slate-800">98.4%</h3>
+                            </div>
+                            <div class="p-3 bg-green-50 text-green-600 rounded-2xl"><i class="fas fa-user-clock"></i></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl shadow-sm border-l-4 border-purple-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Lib Rank</p>
+                                <h3 class="text-3xl font-black text-slate-800">#12</h3>
+                            </div>
+                            <div class="p-3 bg-purple-50 text-purple-600 rounded-2xl"><i class="fas fa-award"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                            <h3 class="font-black text-slate-800 mb-6 flex items-center">
+                                <i class="fas fa-bolt mr-3 text-blue-600"></i> System Notifications
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-5 rounded-2xl bg-green-50/50 border border-green-100">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-10 h-10 bg-green-100 text-green-700 rounded-xl flex items-center justify-center font-bold text-xs"><i class="fas fa-check"></i></div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-800">Form 137 Ready</p>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase">Registrar Office • Finalized</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-black text-slate-400">10:45 AM</span>
+                                </div>
+                                <div class="flex items-center justify-between p-5 rounded-2xl bg-amber-50/50 border border-amber-100">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-xs"><i class="fas fa-clock"></i></div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-800">Book Due Tomorrow</p>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase">Library • "Pre-Calculus Core"</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-black text-slate-400">08:12 AM</span>
+                                </div>
+                                <div class="flex items-center justify-between p-5 rounded-2xl bg-blue-50/50 border border-blue-100">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-10 h-10 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center font-bold text-xs"><i class="fas fa-star"></i></div>
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-800">Points Earned: +15</p>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase">Activity • Book Return (On-Time)</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-black text-slate-400">Yesterday</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+                            <h3 class="font-black text-slate-800 mb-6 flex items-center text-sm">
+                                <i class="fas fa-user-check mr-2 text-blue-600"></i> RFID Log Status
+                            </h3>
+                            <div class="space-y-5">
+                                <div class="flex items-center space-x-4 pb-4 border-b">
+                                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                    <div>
+                                        <p class="text-xs font-black text-slate-800">Library Entry</p>
+                                        <p class="text-[10px] text-slate-400 font-bold">Today, 07:45:02 AM</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-4 pb-4 border-b">
+                                    <div class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                    <div>
+                                        <p class="text-xs font-black text-slate-400">Main Gate Entry</p>
+                                        <p class="text-[10px] text-slate-400 font-bold">Today, 07:12:45 AM</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl p-8 text-blue-900 shadow-xl shadow-amber-200/50 relative overflow-hidden group">
+                            <i class="fas fa-trophy absolute -right-4 -bottom-4 text-8xl opacity-10 group-hover:scale-110 transition-transform"></i>
+                            <h4 class="text-xs font-black uppercase tracking-widest mb-1">Reward Milestone</h4>
+                            <p class="text-sm font-bold leading-tight">50 more points to unlock a "Free Canteen Voucher"</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: LIBRARY (RFID) -->
+            <section id="view-library" class="view-section">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    <div class="lg:col-span-3 space-y-8">
+                        <div class="bg-white rounded-3xl p-8 border shadow-sm">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                                <div>
+                                    <h3 class="font-black text-2xl text-slate-800">Library Catalog</h3>
+                                    <p class="text-xs font-bold text-slate-400 mt-1">Showing 124 of 5,420 books in collection</p>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <div class="bg-slate-50 border px-4 py-2 rounded-xl">
+                                        <select class="bg-transparent text-[11px] font-black text-slate-600 focus:outline-none uppercase tracking-tighter">
+                                            <option>Subject: All</option>
+                                            <option>Science & Tech</option>
+                                            <option>Filipino Literature</option>
+                                            <option>General Mathematics</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- Book 1 -->
+                                <div class="p-6 border rounded-3xl flex flex-col hover:border-blue-500 transition-colors bg-slate-50/30 group">
+                                    <div class="flex space-x-4 mb-6">
+                                        <div class="w-16 h-24 bg-blue-900 text-white rounded-lg flex flex-col items-center justify-center shadow-lg group-hover:scale-105 transition-transform overflow-hidden relative">
+                                            <div class="absolute top-0 w-full h-1 bg-amber-400"></div>
+                                            <i class="fas fa-dna text-2xl opacity-30"></i>
+                                            <span class="text-[8px] font-black uppercase mt-2">BIO</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-black text-sm text-slate-800 leading-tight">General Biology II</h4>
+                                            <p class="text-[10px] text-slate-500 font-bold mt-1">Science Dept.</p>
+                                            <div class="mt-3 flex items-center space-x-2">
+                                                <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-[9px] font-black uppercase">Available</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="simulateRFIDAction('Borrowing Bio II...')" class="w-full py-2.5 bg-white border border-slate-200 text-blue-900 rounded-xl font-black text-[10px] uppercase hover:bg-blue-900 hover:text-white transition-colors">Borrow via RFID</button>
+                                </div>
+                                <!-- Book 2 -->
+                                <div class="p-6 border rounded-3xl flex flex-col hover:border-amber-500 transition-colors bg-slate-50/30 group">
+                                    <div class="flex space-x-4 mb-6">
+                                        <div class="w-16 h-24 bg-amber-500 text-white rounded-lg flex flex-col items-center justify-center shadow-lg group-hover:scale-105 transition-transform overflow-hidden relative">
+                                            <div class="absolute top-0 w-full h-1 bg-blue-900"></div>
+                                            <i class="fas fa-feather text-2xl opacity-30"></i>
+                                            <span class="text-[8px] font-black uppercase mt-2">LIT</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-black text-sm text-slate-800 leading-tight">Florante at Laura</h4>
+                                            <p class="text-[10px] text-slate-500 font-bold mt-1">Filipino Dept.</p>
+                                            <div class="mt-3 flex items-center space-x-2">
+                                                <span class="px-2 py-0.5 bg-red-100 text-red-700 rounded-md text-[9px] font-black uppercase">Borrowed</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="w-full py-2.5 bg-slate-100 border border-slate-200 text-slate-400 rounded-xl font-black text-[10px] uppercase cursor-not-allowed">Unavailable</button>
+                                </div>
+                                <!-- Book 3 -->
+                                <div class="p-6 border rounded-3xl flex flex-col hover:border-blue-500 transition-colors bg-slate-50/30 group">
+                                    <div class="flex space-x-4 mb-6">
+                                        <div class="w-16 h-24 bg-slate-800 text-white rounded-lg flex flex-col items-center justify-center shadow-lg group-hover:scale-105 transition-transform overflow-hidden relative">
+                                            <i class="fas fa-atom text-2xl opacity-30"></i>
+                                            <span class="text-[8px] font-black uppercase mt-2">PHY</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-black text-sm text-slate-800 leading-tight">Intro to Physics</h4>
+                                            <p class="text-[10px] text-slate-500 font-bold mt-1">Science Dept.</p>
+                                            <div class="mt-3 flex items-center space-x-2">
+                                                <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-[9px] font-black uppercase">Available</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="simulateRFIDAction('Borrowing Physics...')" class="w-full py-2.5 bg-white border border-slate-200 text-blue-900 rounded-xl font-black text-[10px] uppercase hover:bg-blue-900 hover:text-white transition-colors">Borrow via RFID</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="bg-white rounded-3xl p-8 border shadow-lg rfid-glow text-center">
+                            <div class="w-24 h-24 bg-blue-50 text-blue-900 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner border border-blue-100 relative">
+                                <i class="fas fa-rss animate-pulse"></i>
+                            </div>
+                            <h3 class="font-black text-slate-800 text-lg mb-2 uppercase tracking-tight">RFID Terminal</h3>
+                            <p class="text-xs text-slate-400 font-bold mb-8">Scan your ID Card to Log Library Entry or Process Book Return</p>
+                            <button onclick="simulateRFIDAction('RFID Check-in Success!')" class="w-full py-4 bg-blue-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-blue-800 transition-all hover:-translate-y-1">Simulate ID Scan</button>
+                        </div>
+
+                        <div class="bg-white rounded-3xl p-8 border shadow-sm">
+                            <h4 class="font-black text-slate-800 mb-6 text-sm">Active Borrows</h4>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[11px] font-bold text-slate-600">Pre-Calculus Core</span>
+                                    <span class="text-[9px] font-black text-red-500 uppercase tracking-tighter">Due Tomorrow</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[11px] font-bold text-slate-600">Noli Me Tangere</span>
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Due Oct 30</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: TRACKING -->
+            <section id="view-tracking" class="view-section">
+                <div class="max-w-5xl mx-auto space-y-8">
+                    <div class="bg-white rounded-3xl p-8 border shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 bg-blue-900 text-white rounded-2xl flex items-center justify-center text-xl shadow-lg"><i class="fas fa-folder-open"></i></div>
+                            <div>
+                                <h3 class="font-black text-2xl text-slate-800">DocTracking System</h3>
+                                <p class="text-xs font-bold text-slate-400">Monitor movements and status of school documents.</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleModal()" class="px-10 py-4 bg-blue-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-blue-800 transition-all hover:scale-105">Request Document</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 bg-white rounded-3xl p-8 border shadow-sm">
+                            <h4 class="font-black text-slate-800 mb-8 flex items-center"><i class="fas fa-list mr-3 text-blue-600"></i> Request History</h4>
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl border-2 border-slate-50 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer group">
+                                    <div class="flex items-center space-x-5">
+                                        <div class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center font-bold text-xs border border-green-100"><i class="fas fa-check"></i></div>
+                                        <div>
+                                            <p class="text-sm font-black text-slate-800">Transcript of Records</p>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase">Requested: Oct 02 • Registrar</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[9px] font-black uppercase">Completed</span>
+                                </div>
+                                <div class="p-5 rounded-2xl border-2 border-blue-50 bg-blue-50/20 flex items-center justify-between hover:bg-blue-50 transition-colors cursor-pointer group">
+                                    <div class="flex items-center space-x-5">
+                                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs border border-blue-200"><i class="fas fa-sync fa-spin"></i></div>
+                                        <div>
+                                            <p class="text-sm font-black text-slate-800">Good Moral Certificate</p>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase">Requested: Oct 24 • Guidance</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[9px] font-black uppercase tracking-tighter">In Progress</span>
+                                </div>
+                                <div class="p-5 rounded-2xl border-2 border-slate-50 flex items-center justify-between opacity-60">
+                                    <div class="flex items-center space-x-5">
+                                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center font-bold text-xs border border-slate-200"><i class="fas fa-times"></i></div>
+                                        <div>
+                                            <p class="text-sm font-black text-slate-800">Enrollment Certification</p>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase">Requested: Sept 15 • Cancelled</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[9px] font-black uppercase">Archived</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-3xl p-8 border shadow-sm">
+                            <h4 class="font-black text-slate-800 mb-8 flex items-center text-sm"><i class="fas fa-route mr-3 text-amber-500"></i> Active Tracking</h4>
+                            <div class="relative space-y-10 pl-6 border-l-2 border-slate-100">
+                                <div class="relative">
+                                    <div class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-green-500 border-4 border-white shadow-sm"></div>
+                                    <p class="text-xs font-black text-slate-800">Submitted</p>
+                                    <p class="text-[10px] text-slate-400 font-bold">Oct 24, 08:00 AM</p>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-blue-500 border-4 border-white shadow-sm"></div>
+                                    <p class="text-xs font-black text-slate-800">Guidance Verification</p>
+                                    <p class="text-[10px] text-blue-500 font-bold">IN PROGRESS</p>
+                                </div>
+                                <div class="relative opacity-30">
+                                    <div class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-slate-200 border-4 border-white shadow-sm"></div>
+                                    <p class="text-xs font-black text-slate-400">Principal Approval</p>
+                                    <p class="text-[10px] text-slate-400 font-bold italic">Pending Review</p>
+                                </div>
+                                <div class="relative opacity-30">
+                                    <div class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-slate-200 border-4 border-white shadow-sm"></div>
+                                    <p class="text-xs font-black text-slate-400">Ready for Release</p>
+                                    <p class="text-[10px] text-slate-400 font-bold italic">Not yet available</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: E-BOOKS -->
+            <section id="view-ebooks" class="view-section">
+                <div class="bg-white rounded-3xl p-8 border shadow-sm mb-8">
+                    <h3 class="font-black text-2xl text-slate-800 mb-2">Digital Library</h3>
+                    <p class="text-xs font-bold text-slate-400">Access your learning materials anywhere, anytime.</p>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
+                    <!-- E-Book 1 -->
+                    <div class="group cursor-pointer">
+                        <div class="aspect-[3/4] bg-white rounded-2xl mb-4 overflow-hidden relative shadow-md border-t-8 border-blue-900 flex flex-col group-hover:-translate-y-2 transition-transform shadow-blue-900/10">
+                            <div class="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                                <i class="fas fa-atom text-3xl text-blue-900 mb-4 opacity-10"></i>
+                                <span class="text-xs font-black text-slate-800 leading-tight">General Chemistry 2</span>
+                                <span class="text-[8px] text-slate-400 font-black uppercase mt-2 px-2 py-1 bg-slate-50 rounded">STEM Core</span>
+                            </div>
+                            <div class="bg-blue-900 text-white py-3 text-center text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Read Digital</div>
+                        </div>
+                    </div>
+                    <!-- E-Book 2 -->
+                    <div class="group cursor-pointer">
+                        <div class="aspect-[3/4] bg-white rounded-2xl mb-4 overflow-hidden relative shadow-md border-t-8 border-amber-500 flex flex-col group-hover:-translate-y-2 transition-transform shadow-amber-500/10">
+                            <div class="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                                <i class="fas fa-calculator text-3xl text-amber-500 mb-4 opacity-10"></i>
+                                <span class="text-xs font-black text-slate-800 leading-tight">Advanced Calculus</span>
+                                <span class="text-[8px] text-slate-400 font-black uppercase mt-2 px-2 py-1 bg-slate-50 rounded">STEM Elective</span>
+                            </div>
+                            <div class="bg-amber-500 text-white py-3 text-center text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Read Digital</div>
+                        </div>
+                    </div>
+                    <!-- E-Book 3 -->
+                    <div class="group cursor-pointer">
+                        <div class="aspect-[3/4] bg-white rounded-2xl mb-4 overflow-hidden relative shadow-md border-t-8 border-green-600 flex flex-col group-hover:-translate-y-2 transition-transform shadow-green-600/10">
+                            <div class="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                                <i class="fas fa-globe-asia text-3xl text-green-600 mb-4 opacity-10"></i>
+                                <span class="text-xs font-black text-slate-800 leading-tight">World History II</span>
+                                <span class="text-[8px] text-slate-400 font-black uppercase mt-2 px-2 py-1 bg-slate-50 rounded">Social Science</span>
+                            </div>
+                            <div class="bg-green-600 text-white py-3 text-center text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Read Digital</div>
+                        </div>
+                    </div>
+                    <!-- E-Book 4 -->
+                    <div class="group cursor-pointer">
+                        <div class="aspect-[3/4] bg-white rounded-2xl mb-4 overflow-hidden relative shadow-md border-t-8 border-purple-600 flex flex-col group-hover:-translate-y-2 transition-transform shadow-purple-600/10">
+                            <div class="flex-1 p-6 flex flex-col items-center justify-center text-center">
+                                <i class="fas fa-code text-3xl text-purple-600 mb-4 opacity-10"></i>
+                                <span class="text-xs font-black text-slate-800 leading-tight">Intro to Python</span>
+                                <span class="text-[8px] text-slate-400 font-black uppercase mt-2 px-2 py-1 bg-slate-50 rounded">ICT Track</span>
+                            </div>
+                            <div class="bg-purple-600 text-white py-3 text-center text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Read Digital</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION: REWARDS -->
+            <section id="view-rewards" class="view-section">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="bg-white rounded-3xl p-8 border shadow-sm">
+                            <h3 class="font-black text-2xl text-slate-800 mb-10 flex items-center">
+                                <i class="fas fa-gift mr-3 text-pink-500"></i> Redeemable Shop
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                <div class="p-8 border-2 border-dashed border-slate-100 rounded-[2.5rem] hover:border-blue-300 transition-all group bg-slate-50/20">
+                                    <div class="flex justify-between items-start mb-6">
+                                        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-[1.5rem] flex items-center justify-center text-2xl border border-blue-100 shadow-inner"><i class="fas fa-print"></i></div>
+                                        <div class="text-right">
+                                            <span class="block text-2xl font-black text-blue-900">150</span>
+                                            <span class="text-[10px] font-black text-blue-300 uppercase tracking-widest">Points Required</span>
+                                        </div>
+                                    </div>
+                                    <h4 class="font-black text-xl text-slate-800">10 Free Prints</h4>
+                                    <p class="text-xs text-slate-400 font-bold mb-8 uppercase tracking-tighter">Library Hub • Valid 30 Days</p>
+                                    <button class="w-full py-4 bg-slate-100 text-slate-400 rounded-2xl font-black text-xs uppercase tracking-widest cursor-not-allowed border border-slate-200">Insufficient Points</button>
+                                </div>
+                                <div class="p-8 border-2 border-blue-100 bg-blue-50/30 rounded-[2.5rem] hover:border-blue-400 transition-all group relative overflow-hidden">
+                                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-amber-400/10 rounded-full blur-2xl"></div>
+                                    <div class="flex justify-between items-start mb-6">
+                                        <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-[1.5rem] flex items-center justify-center text-2xl border border-amber-100 shadow-inner"><i class="fas fa-utensils"></i></div>
+                                        <div class="text-right">
+                                            <span class="block text-2xl font-black text-amber-600">300</span>
+                                            <span class="text-[10px] font-black text-amber-300 uppercase tracking-widest">Points Required</span>
+                                        </div>
+                                    </div>
+                                    <h4 class="font-black text-xl text-slate-800">Canteen Voucher</h4>
+                                    <p class="text-xs text-slate-400 font-bold mb-8 uppercase tracking-tighter">Meal Deal • One-time use</p>
+                                    <button onclick="simulateRFIDAction('Voucher Redeemed!')" class="w-full py-4 bg-blue-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-blue-800 transition-all shadow-blue-900/20">Redeem Reward</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <div class="bg-gradient-to-br from-blue-900 via-indigo-950 to-blue-950 rounded-3xl p-10 text-white shadow-2xl relative overflow-hidden h-full">
+                            <i class="fas fa-gem absolute -right-6 -top-6 text-[10rem] opacity-5 rotate-12"></i>
+                            <h3 class="font-black text-2xl mb-2">Earning Portal</h3>
+                            <p class="text-xs text-blue-300 mb-12 font-bold tracking-tight uppercase">Maximize your school engagement!</p>
+                            
+                            <div class="space-y-8">
+                                <div class="flex items-center space-x-5 group">
+                                    <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-lg text-amber-400 border border-white/10 group-hover:scale-110 transition-transform"><i class="fas fa-id-badge"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-black uppercase tracking-tight">Library RFID Visit</p>
+                                        <p class="text-[10px] text-blue-400 font-bold">Automatic upon entry scan</p>
+                                    </div>
+                                    <span class="text-sm font-black text-amber-400">+5</span>
+                                </div>
+                                <div class="flex items-center space-x-5 group">
+                                    <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-lg text-blue-400 border border-white/10 group-hover:scale-110 transition-transform"><i class="fas fa-book"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-black uppercase tracking-tight">Borrow a Book</p>
+                                        <p class="text-[10px] text-blue-400 font-bold">Verified on system scan</p>
+                                    </div>
+                                    <span class="text-sm font-black text-blue-400">+15</span>
+                                </div>
+                                <div class="flex items-center space-x-5 group">
+                                    <div class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-lg text-green-400 border border-white/10 group-hover:scale-110 transition-transform"><i class="fas fa-clock"></i></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-black uppercase tracking-tight">On-Time Return</p>
+                                        <p class="text-[10px] text-blue-400 font-bold">No overdue penalty</p>
+                                    </div>
+                                    <span class="text-sm font-black text-green-400">+20</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-16 pt-8 border-t border-white/10">
+                                <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-4">Your Progress Level</p>
+                                <div class="flex justify-between text-[11px] font-black mb-2">
+                                    <span>Bronze Tier</span>
+                                    <span>Silver: 500 pts</span>
+                                </div>
+                                <div class="w-full h-3 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/5">
+                                    <div class="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full shadow-lg" style="width: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal for New Document Request -->
+    <div id="modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl animate-fadeIn">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800">Doc Request</h2>
+                    <p class="text-sm text-slate-400 font-bold uppercase tracking-tighter">Official Guidance & Registrar Form</p>
+                </div>
+                <button onclick="toggleModal()" class="w-10 h-10 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="space-y-8">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Select Document Type</label>
+                    <div class="grid grid-cols-1 gap-3">
+                        <button class="flex items-center justify-between p-5 border-2 border-blue-600 bg-blue-50/50 rounded-2xl text-left group">
+                            <div class="flex items-center space-x-4">
+                                <i class="fas fa-certificate text-blue-600"></i>
+                                <span class="text-sm font-black text-blue-900">Good Moral Certificate</span>
+                            </div>
+                            <i class="fas fa-check-circle text-blue-600"></i>
+                        </button>
+                        <button class="flex items-center justify-between p-5 border-2 border-slate-100 hover:border-blue-200 rounded-2xl text-left transition-colors">
+                            <div class="flex items-center space-x-4">
+                                <i class="fas fa-file-alt text-slate-400"></i>
+                                <span class="text-sm font-bold text-slate-600">Transcript of Records (TOR)</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">State Your Purpose</label>
+                    <textarea class="w-full p-5 rounded-2xl border-2 border-slate-100 focus:border-blue-600 focus:outline-none text-sm font-bold bg-slate-50 transition-colors" rows="3" placeholder="e.g. For Scholarship Application at CHED"></textarea>
+                </div>
+            </div>
+
+            <div class="flex space-x-4 mt-12">
+                <button onclick="toggleModal()" class="flex-1 py-4 text-xs font-black text-slate-400 uppercase tracking-widest bg-slate-100 rounded-2xl hover:bg-slate-200 transition-colors">Cancel</button>
+                <button onclick="simulateRFIDAction('Doc Request Sent!')" class="flex-1 py-4 text-xs font-black text-white uppercase tracking-widest bg-blue-900 rounded-2xl shadow-xl hover:bg-blue-800 shadow-blue-900/20 transition-all">Submit to System</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-10 py-5 rounded-[2rem] shadow-2xl flex items-center space-x-5 translate-y-32 transition-transform duration-500 z-[100] border border-white/10">
+        <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-check"></i></div>
+        <div>
+            <span id="toastMsg" class="text-sm font-black uppercase tracking-wider block">Action Successful</span>
+            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">System Record Updated</span>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const menuButtons = document.querySelectorAll('#navMenu button');
+        const viewSections = document.querySelectorAll('.view-section');
+        const viewTitle = document.getElementById('viewTitle');
+        const modal = document.getElementById('modal');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+
+        // Navigation Control
+        menuButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-target');
+                
+                // Active link toggle
+                menuButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Section visibility toggle
+                viewSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === `view-${target}`) {
+                        section.classList.add('active');
+                    }
+                });
+
+                // Title Update
+                viewTitle.innerText = btn.querySelector('span').innerText + (target === 'dashboard' ? ' Overview' : '');
+            });
+        });
+
+        // Modal Control
+        function toggleModal() {
+            modal.classList.toggle('hidden');
+        }
+
+        // Action Simulation
+        function simulateRFIDAction(msg) {
+            if (!modal.classList.contains('hidden')) toggleModal();
+            
+            toastMsg.innerText = msg;
+            toast.classList.remove('translate-y-32');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-32');
+            }, 3500);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("AANNS Digital System Prototype Loaded with Expanded Mock Data");
+        });
+    </script>
+</body>
+</html>
